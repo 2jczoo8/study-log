@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --card-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: #f5f7fa;
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .nav {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--dark);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .nav-btn.active, .nav-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* 主页样式 */
+        .welcome-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+        
+        .subject-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .subject-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 18px;
+            color: white;
+        }
+        
+        .chinese-bg { background: #e74c3c; }
+        .math-bg { background: #3498db; }
+        .english-bg { background: #2ecc71; }
+        .physics-bg { background: #9b59b6; }
+        .chemistry-bg { background: #f39c12; }
+        .biology-bg { background: #1abc9c; }
+        
+        .subject-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .total-count {
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            margin: 15px 0;
+            color: var(--primary);
+        }
+        
+        /* 学科详情页样式 */
+        .detail-header {
+            background: white;
+            padding: 20px;
+            border-radius: 12px 12px 0 0;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2px;
+        }
+        
+        .detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: var(--card-shadow);
+            border-radius: 0 0 12px 12px;
+            overflow: hidden;
+        }
+        
+        .detail-table th, .detail-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .detail-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .detail-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--card-shadow);
+        }
+        
+        .back-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav {
+                justify-content: center;
+            }
+            
+            .detail-table {
+                font-size: 14px;
+            }
+            
+            .detail-table th, .detail-table td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">做题记录</div>
+            <div class="nav">
+                <button class="nav-btn active" data-page="home">主页</button>
+                <button class="nav-btn" data-page="chinese">语文</button>
+                <button class="nav-btn" data-page="math">数学</button>
+                <button class="nav-btn" data-page="english">英语</button>
+                <button class="nav-btn" data-page="physics">物理</button>
+                <button class="nav-btn" data-page="chemistry">化学</button>
+                <button class="nav-btn" data-page="biology">生物</button>
+            </div>
+        </header>
+
+        <!-- 主页内容 -->
+            
+            <div class="stats-grid">
+                <!-- 语文卡片 -->
+                <div class="stat-card" data-subject="chinese">
+                    <div class="subject-header">
+                        <div class="subject-icon chinese-bg">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="subject-title">语文</div>
+                    </div>
+                    <div class="total-count">0 题</div>
+                </div>
+                
+                <!-- 数学卡片 -->
+                <div class="stat-card" data-subject="math">
+                    <div class="subject-header">
+                        <div class="subject-icon math-bg">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                        <div class="subject-title">数学</div>
+                    </div>
+                    <div class="total-count">0 题</div>
+                </div>
+                
+                <!-- 英语卡片 -->
+                <div class="stat-card" data-subject="english">
+                    <div class="subject-header">
+                        <div class="subject-icon english-bg">
+                            <i class="fas fa-language"></i>
+                        </div>
+                        <div class="subject-title">英语</div>
+                    </div>
+                    <div class="total-count">0 题</div>
+                </div>
+                
+                <!-- 物理卡片 -->
+                <div class="stat-card" data-subject="physics">
+                    <div class="subject-header">
+                        <div class="subject-icon physics-bg">
+                            <i class="fas fa-atom"></i>
+                        </div>
+                        <div class="subject-title">物理</div>
+                    </div>
+                    <div class="total-count">0 题</div>
+                </div>
+                
+                <!-- 化学卡片 -->
+                <div class="stat-card" data-subject="chemistry">
+                    <div class="subject-header">
+                        <div class="subject-icon chemistry-bg">
+                            <i class="fas fa-flask"></i>
+                        </div>
+                        <div class="subject-title">化学</div>
+                    </div>
+                    <div class="total-count">0 题</div>
+                </div>
+                
+                <!-- 生物卡片 -->
+                <div class="stat-card" data-subject="biology">
+                    <div class="subject-header">
+                        <div class="subject-icon biology-bg">
+                            <i class="fas fa-dna"></i>
+                        </div>
+                        <div class="subject-title">生物</div>
+                    </div>
+                    <div class="total-count">0 题</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 语文详情页 -->
+        <div id="chinese-page" class="page">
+            <button class="back-btn" onclick="showPage('home')">
+                <i class="fas fa-arrow-left"></i> 返回主页
+            </button>
+            
+            <div class="detail-header">
+                <h2>语文 - 做题记录</h2>
+            </div>
+            
+            <table class="detail-table">
+                <thead>
+                    <tr>
+                        <th>题型</th>
+                        <th>做题数量</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>材料文本阅读</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>现代文阅读</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>文言文阅读</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>诗歌鉴赏</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>语言运用</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>作文</td>
+                        <td>0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 数学详情页 -->
+        <div id="math-page" class="page">
+            <button class="back-btn" onclick="showPage('home')">
+                <i class="fas fa-arrow-left"></i> 返回主页
+            </button>
+            
+            <div class="detail-header">
+                <h2>数学 - 做题记录</h2>
+            </div>
+            
+            <table class="detail-table">
+                <thead>
+                    <tr>
+                        <th>难度级别</th>
+                        <th>做题数量</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>简单</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>中档</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>困难</td>
+                        <td>0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 英语详情页 -->
+        <div id="english-page" class="page">
+            <button class="back-btn" onclick="showPage('home')">
+                <i class="fas fa-arrow-left"></i> 返回主页
+            </button>
+            
+            <div class="detail-header">
+                <h2>英语 - 做题记录</h2>
+            </div>
+            
+            <table class="detail-table">
+                <thead>
+                    <tr>
+                        <th>题型</th>
+                        <th>做题数量</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>阅读理解</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>完形填空</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>语法填空</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>应用文</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>读后续写</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>听力</td>
+                        <td>0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 物理详情页 -->
+        <div id="physics-page" class="page">
+            <button class="back-btn" onclick="showPage('home')">
+                <i class="fas fa-arrow-left"></i> 返回主页
+            </button>
+            
+            <div class="detail-header">
+                <h2>物理 - 做题记录</h2>
+            </div>
+            
+            <table class="detail-table">
+                <thead>
+                    <tr>
+                        <th>题型</th>
+                        <th>做题数量</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>选择题</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>实验题</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>计算题</td>
+                        <td>0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 化学详情页 -->
+        <div id="chemistry-page" class="page">
+            <button class="back-btn" onclick="showPage('home')">
+                <i class="fas fa-arrow-left"></i> 返回主页
+            </button>
+            
+            <div class="detail-header">
+                <h2>化学 - 做题记录</h2>
+            </div>
+            
+            <table class="detail-table">
+                <thead>
+                    <tr>
+                        <th>题型</th>
+                        <th>做题数量</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>选择题</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>大题</td>
+                        <td>0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 生物详情页 -->
+        <div id="biology-page" class="page">
+            <button class="back-btn" onclick="showPage('home')">
+                <i class="fas fa-arrow-left"></i> 返回主页
+            </button>
+            
+            <div class="detail-header">
+                <h2>生物 - 做题记录</h2>
+            </div>
+            
+            <table class="detail-table">
+                <thead>
+                    <tr>
+                        <th>题型</th>
+                        <th>做题数量</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>选择题</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>大题</td>
+                        <td>0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // 页面导航功能
+        document.querySelectorAll('.nav-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const pageId = button.dataset.page + '-page';
+                showPage(pageId);
+                
+                // 更新活动按钮状态
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                button.classList.add('active');
+            });
+        });
+        
+        function showPage(pageId) {
+            // 隐藏所有页面
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // 显示指定页面
+            document.getElementById(pageId).classList.add('active');
+        }
+        
+        // 点击学科卡片跳转到详情页
+        document.querySelectorAll('.stat-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const subject = card.dataset.subject;
+                showPage(subject + '-page');
+                
+                // 更新导航按钮状态
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-page="${subject}"]`).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
